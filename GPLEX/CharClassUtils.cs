@@ -59,9 +59,9 @@ namespace QUT.Gplex
         /// </summary>
         class TreeNode
         {
-            int min;
-            int max;
-            int value;
+            readonly int min;
+            readonly int max;
+            readonly int value;
             TreeNode lKid;
             TreeNode rKid;
 
@@ -126,7 +126,7 @@ namespace QUT.Gplex
         // ==========================================================
 
         int count;
-        TreeNode root;
+        readonly TreeNode root;
 
         internal int this[int theChar]
         {
@@ -304,8 +304,8 @@ namespace QUT.Gplex
 
     internal static class CharCategory
     {
-        static BitArray idStart = new BitArray(32, false);
-        static BitArray idPart = new BitArray(32, false);
+        static readonly BitArray idStart = new BitArray(32, false);
+        static readonly BitArray idPart = new BitArray(32, false);
 
         /// <summary>
         /// This method builds bit-sets to represent the UnicodeCategory

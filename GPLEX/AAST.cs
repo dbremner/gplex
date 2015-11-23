@@ -22,9 +22,9 @@ namespace QUT.Gplex.Parser {
         internal QUT.Gplex.Lexer.Scanner scanner;
         internal ErrorHandler hdlr;
 
-        private List<LexSpan> prolog = new List<LexSpan>();   // Verbatim declarations for scanning routine
-        private List<LexSpan> epilog = new List<LexSpan>();   // Epilog code for the scanning routine
-        private List<LexSpan> codeIncl = new List<LexSpan>();   // Text to copy verbatim into output file
+        private readonly List<LexSpan> prolog = new List<LexSpan>();   // Verbatim declarations for scanning routine
+        private readonly List<LexSpan> epilog = new List<LexSpan>();   // Epilog code for the scanning routine
+        private readonly List<LexSpan> codeIncl = new List<LexSpan>();   // Text to copy verbatim into output file
 
         internal List<LexSpan> usingStrs = new List<LexSpan>();  // "using" dotted names
         internal LexSpan nameString;                             // Namespace dotted name
@@ -37,12 +37,12 @@ namespace QUT.Gplex.Parser {
 
         internal List<RuleDesc> ruleList = new List<RuleDesc>();
         internal List<LexCategory> lexCatsWithPredicates = new List<LexCategory>();
-        Dictionary<string, LexCategory> lexCategories = new Dictionary<string, LexCategory>();
+        readonly Dictionary<string, LexCategory> lexCategories = new Dictionary<string, LexCategory>();
         internal Dictionary<string, PredicateLeaf> cats; // Allocated on demand
         internal Dictionary<string, StartState> startStates = new Dictionary<string, StartState>();
-        private List<StartState> inclStates = new List<StartState>();
+        private readonly List<StartState> inclStates = new List<StartState>();
 
-        Automaton.TaskState task;
+        readonly Automaton.TaskState task;
 
         internal Automaton.TaskState Task { get { return task; } }
         internal int CodePage { get { return task.CodePage; } }
@@ -327,13 +327,13 @@ namespace QUT.Gplex.Parser {
             BitArray prStart;
 
             const char NUL = '\0';
-            int symCard;
+            readonly int symCard;
             int index;              // index of the *next* character to be read
             char chr;               // the last char to be read.
             bool esc;               // the last character was backslash-escaped
-            AAST parent;
-            LexSpan span;
-            string pat;
+            readonly AAST parent;
+            readonly LexSpan span;
+            readonly string pat;
 
             /// <summary>
             /// Defines the character set special to regular expressions
@@ -832,10 +832,10 @@ namespace QUT.Gplex.Parser {
     // Reason for FxCop message suppression -
     // This exception cannot escape from the local context
     internal class RegExException : Exception {
-        int errNo;
+        readonly int errNo;
         int index;
-        int length;
-        string text;
+        readonly int length;
+        readonly string text;
 
         internal RegExException( int errorNum, int stringIx, int count, string message ) { errNo = errorNum; index = stringIx; length = count; text = message; }
 
@@ -854,12 +854,12 @@ namespace QUT.Gplex.Parser {
     internal sealed class StartState {
         static int next = -1;
 
-        int ord;
+        readonly int ord;
         //bool isExcl;
         //bool isInit;
-        bool isAll;
-        bool isDummy;
-        string name;
+        readonly bool isAll;
+        readonly bool isDummy;
+        readonly string name;
         internal List<RuleDesc> rules = new List<RuleDesc>();
 
         internal static StartState allState = new StartState( "$ALL$", true );    // ord = -1
@@ -1091,9 +1091,9 @@ namespace QUT.Gplex.Parser {
     }
 
     internal sealed class LexCategory {
-        string name;
-        string verb;
-        LexSpan vrbSpan;
+        readonly string name;
+        readonly string verb;
+        readonly LexSpan vrbSpan;
         bool hasPred;
         internal RegExTree regX;
 
@@ -1116,7 +1116,7 @@ namespace QUT.Gplex.Parser {
     }
 
     internal sealed class RuleBuffer {
-        List<LexSpan> locs = new List<LexSpan>();
+        readonly List<LexSpan> locs = new List<LexSpan>();
         int fRuleLine, lRuleLine;  // First line of rules, last line of rules.
 
         internal int FLine { get { return fRuleLine; } set { fRuleLine = value; } }
@@ -1239,7 +1239,7 @@ namespace QUT.Gplex.Parser {
     }
 
     internal sealed class PredicateLeaf : Leaf {
-        CharTest Test;
+        readonly CharTest Test;
 
         internal PredicateLeaf() : base( RegOp.charClass ) { }
 

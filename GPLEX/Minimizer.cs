@@ -69,13 +69,13 @@ namespace QUT.Gplex.Automaton
     // Apparently "minimizer" is not in the FxCop dictionary?  It should be!
     public class Minimizer
     {
-        private DFSA dfsa;
-        private Stack<PartitionBlock> worklist = new Stack<PartitionBlock>();
+        private readonly DFSA dfsa;
+        private readonly Stack<PartitionBlock> worklist = new Stack<PartitionBlock>();
 
-        PartitionBlock otherStates;
-        PartitionBlock startStates;
-        List<PartitionBlock> acceptStates = new List<PartitionBlock>();
-        List<PartitionBlock> allBlocks = new List<PartitionBlock>();
+        readonly PartitionBlock otherStates;
+        readonly PartitionBlock startStates;
+        readonly List<PartitionBlock> acceptStates = new List<PartitionBlock>();
+        readonly List<PartitionBlock> allBlocks = new List<PartitionBlock>();
         
         internal Minimizer(DFSA dfsa) { 
             this.dfsa = dfsa;

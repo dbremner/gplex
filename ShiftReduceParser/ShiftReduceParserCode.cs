@@ -77,9 +77,9 @@ namespace QUT.Gppg {
         private bool recovering;
         private int tokensSinceLastError;
 
-        private PushdownPrefixState<State> StateStack = new PushdownPrefixState<State>();
-        private PushdownPrefixState<TValue> valueStack = new PushdownPrefixState<TValue>();
-        private PushdownPrefixState<TSpan> locationStack = new PushdownPrefixState<TSpan>();
+        private readonly PushdownPrefixState<State> StateStack = new PushdownPrefixState<State>();
+        private readonly PushdownPrefixState<TValue> valueStack = new PushdownPrefixState<TValue>();
+        private readonly PushdownPrefixState<TSpan> locationStack = new PushdownPrefixState<TSpan>();
 
         /// <summary>
         /// The stack of semantic value (YYSTYPE) values.
@@ -612,10 +612,10 @@ namespace QUT.Gppg {
     internal class LexLocation : IMerge<LexLocation>
 #endif
  {
-        private int startLine;   // start line
-        private int startColumn; // start column
-        private int endLine;     // end line
-        private int endColumn;   // end column
+        private readonly int startLine;   // start line
+        private readonly int startColumn; // start column
+        private readonly int endLine;     // end line
+        private readonly int endColumn;   // end column
 
         /// <summary>
         /// The line at which the text span starts.

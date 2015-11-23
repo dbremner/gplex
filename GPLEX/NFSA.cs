@@ -12,7 +12,7 @@ namespace QUT.Gplex.Automaton
 {
     class NFSA
     {
-        TaskState task;
+        readonly TaskState task;
 
         public NfsaInstance[] nfas;
 
@@ -172,12 +172,12 @@ namespace QUT.Gplex.Automaton
             internal List<NState> nStates = new List<NState>();
             internal NFSA parent;
 
-            private bool pack;
+            private readonly bool pack;
             private int maxE = defN;                       // number of elements in epsilon BitArray
-            private int maxS;
+            private readonly int maxS;
 
             NState anchorState;
-            NState entryState;
+            readonly NState entryState;
 
             public NfsaInstance(StartState ss, NFSA parent)
             {
@@ -421,10 +421,10 @@ namespace QUT.Gplex.Automaton
         {
             private static uint nextSN;
 
-            NfsaInstance myNfaInst;
-            NFSA myNfsa;
+            readonly NfsaInstance myNfaInst;
+            readonly NFSA myNfsa;
             internal int ord;
-            private uint serialNumber;
+            private readonly uint serialNumber;
             internal BitArray epsilons;                 // epsilon transitions.
             internal List<NState> epsList = new List<NState>();
             internal RuleDesc accept;                   // rule matched OR null

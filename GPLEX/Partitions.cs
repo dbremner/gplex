@@ -282,7 +282,7 @@ namespace QUT.Gplex.Parser
     /// </summary>
     internal class Accumulator : RegExDFS
     {
-        Partition partition;
+        readonly Partition partition;
 
         internal Accumulator(Partition part) { this.partition = part; }
 

@@ -49,7 +49,7 @@ namespace QUT.Gplex.Automaton
         bool hasLeftAnchors;
         bool foundShortestStrings;
 
-        int maxSym;                      // Backing field for MaxSym property
+        readonly int maxSym;                      // Backing field for MaxSym property
 
         /// <summary>
         /// A reference to the controlling task-state
@@ -221,7 +221,7 @@ namespace QUT.Gplex.Automaton
         /// </summary>
         internal class NSetFactory
         {
-            private int length;
+            private readonly int length;
             public NSetFactory(int nfsaCardinality) { length = (nfsaCardinality + 31) / 32; }
             public NSet MkNewSet() { return new NSet(length); }
 
@@ -232,7 +232,7 @@ namespace QUT.Gplex.Automaton
             /// </summary>
             public class NSet : IEquatable<NSet>
             {
-                private uint[] arr;
+                private readonly uint[] arr;
                 internal NSet(int length) { arr = new uint[length]; }
 
                 public bool Equals(NSet val)
@@ -274,7 +274,7 @@ namespace QUT.Gplex.Automaton
             /// </summary>
             public class NEnum
             {
-                uint[] arr;
+                readonly uint[] arr;
                 uint elem;      // having elem zero is essential both initially and after Reset.
                 int current, idx, ord;
                 internal NEnum(uint[] dat) { arr = dat; current = -1; idx = -1; }
@@ -331,9 +331,9 @@ namespace QUT.Gplex.Automaton
             internal DFSA parent;                      // Parent DFSA reference
             internal LexSpan eofCode;                  // Text span for EOF semantic action.
             internal NFSA.NfsaInstance myNfaInst;      // Corresponding NFSA instance
-            NSetFactory factory;                       // Factory for creating NSet objects
+            readonly NSetFactory factory;                       // Factory for creating NSet objects
 
-            Dictionary<NSetFactory.NSet, DState> dfaTable = new Dictionary<NSetFactory.NSet, DState>();
+            readonly Dictionary<NSetFactory.NSet, DState> dfaTable = new Dictionary<NSetFactory.NSet, DState>();
 
             public DfsaInstance(NFSA.NfsaInstance nfa, DFSA dfa)
             {

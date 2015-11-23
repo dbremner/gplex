@@ -88,18 +88,18 @@ namespace QUT.Gplex.Parser
     {
         internal Parser(Scanner scanner) : base(scanner) { }
 
-        static LexSpan blank = new LexSpan();  // marked by buff == null
+        static readonly LexSpan blank = new LexSpan();  // marked by buff == null
         internal static LexSpan BlankSpan { get { return blank; } }
  
         ErrorHandler handler;
-        StartStateScope scope = new StartStateScope();
+        readonly StartStateScope scope = new StartStateScope();
 
         AAST aast;
         internal AAST Aast { get { return aast; } }
 
         OptionParser2 processOption2;
 
-        RuleBuffer rb = new RuleBuffer();
+        readonly RuleBuffer rb = new RuleBuffer();
         bool typedeclOK = true;
         bool isBar;
 
@@ -128,8 +128,8 @@ namespace QUT.Gplex.Parser
             }
         }
 
-        List<LexSpan> nameLocs = new List<LexSpan>();
-        List<string> nameList = new List<string>();
+        readonly List<LexSpan> nameLocs = new List<LexSpan>();
+        readonly List<string> nameList = new List<string>();
 
         internal void AddName(LexSpan l)
         {
