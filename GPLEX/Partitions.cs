@@ -806,7 +806,7 @@ namespace QUT.Gplex.Parser
         private int tableOrd = -1;
         private int hash;
 
-        internal MapRun(int min, int max, int val)
+        internal MapRun(int min, int max, int val=0)
         {
             hash = (max - min + 1) * val;
             range = new CharRange(min, max);
@@ -818,17 +818,13 @@ namespace QUT.Gplex.Parser
                 tag = TagType.shortRun;
         }
 
-        internal MapRun(int min, int max) : this(min, max, 0) {}
-
         internal int Length { 
-            get { return ((int)range.maxChr - (int)range.minChr + 1); } 
+            get { return (range.maxChr - range.minChr + 1); } 
         }
 
         internal int TableOrd { get { return tableOrd; } set { tableOrd = value; } }
 
-        internal void Merge(int min, int max) { Merge(min, max, 0); }
-
-        internal void Merge(int min, int max, int val)
+        internal void Merge(int min, int max, int val=0)
         {
             if (this.range.maxChr != (min - 1)) 
                 throw new GplexInternalException("Bad MapRun Merge");
