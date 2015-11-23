@@ -172,10 +172,6 @@ namespace QUT.Gplex.Automaton
             internal List<NState> nStates = new List<NState>();
             internal NFSA parent;
 
-            private readonly bool pack;
-            private int maxE = defN;                       // number of elements in epsilon BitArray
-            private readonly int maxS;
-
             NState anchorState;
             readonly NState entryState;
 
@@ -183,28 +179,28 @@ namespace QUT.Gplex.Automaton
             {
                 myStartCondition = ss;
                 this.parent = parent;
-                this.pack = parent.task.ChrClasses;
-                if (pack)
-                    maxS = parent.task.partition.Length;          // Number of equivalence classes
+                this.Pack = parent.task.ChrClasses;
+                if (Pack)
+                    MaxSym = parent.task.partition.Length;          // Number of equivalence classes
                 else
-                    maxS = parent.task.TargetSymCardinality;      // Size of alphabet
+                    MaxSym = parent.task.TargetSymCardinality;      // Size of alphabet
                 entryState = MkState();
             }
 
             /// <summary>
             /// The target alphabet cardinality
             /// </summary>
-            internal int MaxSym { get { return maxS; } }
+            internal int MaxSym { get; }
 
             /// <summary>
             /// True means this automaton uses character equivalence classes
             /// </summary>
-            internal bool Pack { get { return pack; } }
+            internal bool Pack { get; }
 
             /// <summary>
-            /// The current size of the dynamically sized epsilon list
+            /// The current size of the dynamically sized epsilon BitArray list
             /// </summary>
-            internal int MaxEps { get { return maxE; } }
+            internal int MaxEps { get; private set; } = defN;
 
             internal bool LeftAnchored { get { return anchorState != null; } }
 
@@ -214,7 +210,7 @@ namespace QUT.Gplex.Automaton
             {
                 NState s = new NState(this);
                 s.ord = nStates.Count;
-                if (s.ord >= maxE) maxE *= 2;
+                if (s.ord >= MaxEps) MaxEps *= 2;
                 nStates.Add(s);
                 return s;
             }

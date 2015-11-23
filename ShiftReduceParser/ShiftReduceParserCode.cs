@@ -24,21 +24,17 @@ namespace QUT.Gppg {
     internal abstract class ShiftReduceParser<TValue, TSpan>
 #endif
  where TSpan : IMerge<TSpan>, new() {
-        private AbstractScanner<TValue, TSpan> scanner;
         /// <summary>
         /// The abstract scanner for this parser.
         /// </summary>
-        protected AbstractScanner<TValue, TSpan> Scanner {
-            get { return scanner; }
-            set { scanner = value; }
-        }
+        protected AbstractScanner<TValue, TSpan> Scanner { get; set; }
 
         /// <summary>
         /// Constructor for base class
         /// </summary>
         /// <param name="scanner">Scanner instance for this parser</param>
         protected ShiftReduceParser( AbstractScanner<TValue, TSpan> scanner ) {
-            this.scanner = scanner;
+            this.Scanner = scanner;
         }
 
         // ==============================================================
@@ -78,18 +74,16 @@ namespace QUT.Gppg {
         private int tokensSinceLastError;
 
         private readonly PushdownPrefixState<State> StateStack = new PushdownPrefixState<State>();
-        private readonly PushdownPrefixState<TValue> valueStack = new PushdownPrefixState<TValue>();
-        private readonly PushdownPrefixState<TSpan> locationStack = new PushdownPrefixState<TSpan>();
 
         /// <summary>
         /// The stack of semantic value (YYSTYPE) values.
         /// </summary>
-        protected PushdownPrefixState<TValue> ValueStack { get { return valueStack; } }
+        protected PushdownPrefixState<TValue> ValueStack { get; } = new PushdownPrefixState<TValue>();
 
         /// <summary>
         /// The stack of location value (YYLTYPE) varlues.
         /// </summary>
-        protected PushdownPrefixState<TSpan> LocationStack { get { return locationStack; } }
+        protected PushdownPrefixState<TSpan> LocationStack { get; } = new PushdownPrefixState<TSpan>();
 
         private int errorToken;
         private int endOfFileToken;
@@ -207,7 +201,7 @@ namespace QUT.Gppg {
             FsaState = states[0];
 
             StateStack.Push( FsaState );
-            valueStack.Push( CurrentSemanticValue );
+            ValueStack.Push( CurrentSemanticValue );
             LocationStack.Push( CurrentLocationSpan );
 
             while (true) {
@@ -222,8 +216,8 @@ namespace QUT.Gppg {
                         // We save the last token span, so that the location span
                         // of production right hand sides that begin or end with a
                         // nullable production will be correct.
-                        LastSpan = scanner.yylloc;
-                        NextToken = scanner.yylex();
+                        LastSpan = Scanner.yylloc;
+                        NextToken = Scanner.yylex();
 #if TRACE_ACTIONS
                        Console.Error.WriteLine( "Reading: Next token is {0}", TerminalToString( NextToken ) );
 #endif
@@ -271,9 +265,9 @@ namespace QUT.Gppg {
 #endif
             FsaState = states[stateIndex];
 
-            valueStack.Push( scanner.yylval );
+            ValueStack.Push( Scanner.yylval );
             StateStack.Push( FsaState );
-            LocationStack.Push( scanner.yylloc );
+            LocationStack.Push( Scanner.yylloc );
 
             if (recovering) {
                 if (NextToken != errorToken)
@@ -297,7 +291,7 @@ namespace QUT.Gppg {
             //  Default actions for unit productions.
             //
             if (rhLen == 1) {
-                CurrentSemanticValue = valueStack.TopElement();   // Default action: $$ = $1;
+                CurrentSemanticValue = ValueStack.TopElement();   // Default action: $$ = $1;
                 CurrentLocationSpan = LocationStack.TopElement(); // Default action "@$ = @1;
             }
             else if (rhLen == 0) {
@@ -308,13 +302,13 @@ namespace QUT.Gppg {
                 // beginning of the next lexeme, and end with the finish of the
                 // previous lexeme.  This gives the correct behaviour when this
                 // nonsense value is used in later Merge operations.
-                CurrentLocationSpan = (scanner.yylloc != null && LastSpan != null ?
-                    scanner.yylloc.Merge( LastSpan ) :
+                CurrentLocationSpan = (Scanner.yylloc != null && LastSpan != null ?
+                    Scanner.yylloc.Merge( LastSpan ) :
                     default( TSpan ));
             }
             else {
                 // Default action: $$ = $1;
-                CurrentSemanticValue = valueStack[LocationStack.Depth - rhLen];
+                CurrentSemanticValue = ValueStack[LocationStack.Depth - rhLen];
                 //  Default action "@$ = @1.Merge(@N)" for location info.
                 TSpan at1 = LocationStack[LocationStack.Depth - rhLen];
                 TSpan atN = LocationStack[LocationStack.Depth - 1];
@@ -326,7 +320,7 @@ namespace QUT.Gppg {
 
             for (int i = 0; i < rule.RightHandSide.Length; i++) {
                 StateStack.Pop();
-                valueStack.Pop();
+                ValueStack.Pop();
                 LocationStack.Pop();
             }
             FsaState = StateStack.TopElement();
@@ -335,7 +329,7 @@ namespace QUT.Gppg {
                 FsaState = states[FsaState.Goto[rule.LeftHandSide]];
 
             StateStack.Push( FsaState );
-            valueStack.Push( CurrentSemanticValue );
+            ValueStack.Push( CurrentSemanticValue );
             LocationStack.Push( CurrentLocationSpan );
         }
 
@@ -380,7 +374,7 @@ namespace QUT.Gppg {
                     first = false;
                 }
             }
-            scanner.yyerror( errorMsg.ToString() );
+            Scanner.yyerror( errorMsg.ToString() );
         }
 
         private void ShiftErrorToken() {
@@ -407,7 +401,7 @@ namespace QUT.Gppg {
 					Console.Error.WriteLine("Error: popping state {0}", StateStack.TopElement().number);
 #endif
                 StateStack.Pop();
-                valueStack.Pop();
+                ValueStack.Pop();
                 LocationStack.Pop();
 
 #if TRACE_ACTIONS
@@ -435,7 +429,7 @@ namespace QUT.Gppg {
 #if TRACE_ACTIONS
                             Console.Error.Write("Reading a token: ");
 #endif
-                        NextToken = scanner.yylex();
+                        NextToken = Scanner.yylex();
                     }
 #if TRACE_ACTIONS
                         Console.Error.WriteLine("Next token is {0}", TerminalToString(NextToken));

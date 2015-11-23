@@ -88,9 +88,8 @@ namespace QUT.Gplex.Parser
     {
         internal Parser(Scanner scanner) : base(scanner) { }
 
-        static readonly LexSpan blank = new LexSpan();  // marked by buff == null
-        internal static LexSpan BlankSpan { get { return blank; } }
- 
+        internal static LexSpan BlankSpan { get; } = new LexSpan(); // marked by buff == null
+
         ErrorHandler handler;
         readonly StartStateScope scope = new StartStateScope();
 

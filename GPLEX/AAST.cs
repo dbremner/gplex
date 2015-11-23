@@ -22,13 +22,8 @@ namespace QUT.Gplex.Parser {
         internal QUT.Gplex.Lexer.Scanner scanner;
         internal ErrorHandler hdlr;
 
-        private readonly List<LexSpan> prolog = new List<LexSpan>();   // Verbatim declarations for scanning routine
-        private readonly List<LexSpan> epilog = new List<LexSpan>();   // Epilog code for the scanning routine
-        private readonly List<LexSpan> codeIncl = new List<LexSpan>();   // Text to copy verbatim into output file
-
         internal List<LexSpan> usingStrs = new List<LexSpan>();  // "using" dotted names
         internal LexSpan nameString;                             // Namespace dotted name
-        private LexSpan userCode;                                // Text from the user code section
 
         internal string visibility = "public";                   // Visibility name "public" or "internal"
         internal string scanBaseName = "ScanBase";               // Name of scan base class.
@@ -57,14 +52,11 @@ namespace QUT.Gplex.Parser {
             startStates.Add( StartState.allState.Name, StartState.allState );
         }
 
-        internal LexSpan UserCode {
-            get { return userCode; }
-            set { userCode = value; }
-        }
+        internal LexSpan UserCode { get; set; } // Text from the user code section
 
-        internal List<LexSpan> CodeIncl { get { return codeIncl; } }
-        internal List<LexSpan> Prolog { get { return prolog; } }
-        internal List<LexSpan> Epilog { get { return epilog; } }
+        internal List<LexSpan> CodeIncl { get; } = new List<LexSpan>(); // Text to copy verbatim into output file
+        internal List<LexSpan> Prolog { get; } = new List<LexSpan>(); // Verbatim declarations for scanning routine
+        internal List<LexSpan> Epilog { get; } = new List<LexSpan>(); // Epilog code for the scanning routine
 
         internal void AddCodeSpan( Destination dest, LexSpan span ) {
             if (!span.IsInitialized) return;
@@ -845,29 +837,25 @@ namespace QUT.Gplex.Parser {
     internal sealed class StartState {
         static int next = -1;
 
-        readonly int ord;
         //bool isExcl;
         //bool isInit;
-        readonly bool isAll;
-        readonly bool isDummy;
-        readonly string name;
         internal List<RuleDesc> rules = new List<RuleDesc>();
 
         internal static StartState allState = new StartState( "$ALL$", true );    // ord = -1
         internal static StartState initState = new StartState( "INITIAL", false ); // ord = 0;
 
         internal StartState( bool isDmy, string str ) {
-            isDummy = isDmy; name = str; ord = next++;
+            IsDummy = isDmy; Name = str; Ord = next++;
         }
 
         StartState( string str, bool isAll ) {
-            name = str; this.isAll = isAll; ord = next++;
+            Name = str; this.IsAll = isAll; Ord = next++;
         }
 
-        internal string Name { get { return name; } }
-        internal int Ord { get { return ord; } }
-        internal bool IsAll { get { return isAll; } }
-        internal bool IsDummy { get { return isDummy; } }
+        internal string Name { get; }
+        internal int Ord { get; }
+        internal bool IsAll { get; }
+        internal bool IsDummy { get; }
 
         internal void AddRule( RuleDesc rule ) {
             rules.Add( rule );
@@ -1079,24 +1067,19 @@ namespace QUT.Gplex.Parser {
     }
 
     internal sealed class LexCategory {
-        readonly string name;
         readonly string verb;
         readonly LexSpan vrbSpan;
-        bool hasPred;
         internal RegExTree regX;
 
         internal LexCategory( string nam, string vrb, LexSpan spn ) {
             vrbSpan = spn;
             verb = vrb;
-            name = nam;
+            Name = nam;
         }
 
-        internal bool HasPredicate {
-            get { return hasPred; }
-            set { hasPred = value; }
-        }
+        internal bool HasPredicate { get; set; }
 
-        internal string Name { get { return name; } }
+        internal string Name { get; }
 
         internal string PredDummyName { get { return "PRED_" + name + "_DUMMY"; } }
 
@@ -1105,10 +1088,10 @@ namespace QUT.Gplex.Parser {
 
     internal sealed class RuleBuffer {
         readonly List<LexSpan> locs = new List<LexSpan>();
-        int fRuleLine, lRuleLine;  // First line of rules, last line of rules.
 
-        internal int FLine { get { return fRuleLine; } set { fRuleLine = value; } }
-        internal int LLine { get { return lRuleLine; } set { lRuleLine = value; } }
+        internal int FLine { get; set; } //first line of rules
+
+        internal int LLine { get; set; } //last line of rules
 
         internal void AddSpan( LexSpan l ) { locs.Add( l ); }
 

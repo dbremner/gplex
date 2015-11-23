@@ -15,15 +15,12 @@ namespace QUT.Gplex.Automaton
 {
     internal class PartitionBlock
     {
-        private int symbolsLeft;               //  Number of symbols left on the "pair-list" for this block.
-        private int generation;                //  The current splitting generation.
-        private int predCount;                 //  Number of predecessors from the current generation.
         internal PartitionBlock twinBlk;       //  During a split, the two fragments reference each other.
         internal LinkedList<DFSA.DState> members;
 
-        public int Sym { get { return symbolsLeft; } set { symbolsLeft = value; } }
-        public int Gen { get { return generation; } set { generation = value; } }
-        public int PredCount { get { return predCount; } set { predCount = value; } }
+        public int Sym { get; set; } //  Number of symbols left on the "pair-list" for this block.
+        public int Gen { get; set; } //The current splitting generation
+        public int PredCount { get; set; } //  Number of predecessors from the current generation.
         public int MemberCount { get { return members.Count; } }
         public DFSA.DState FirstMember { get { return members.First.Value; } }
 
@@ -54,12 +51,12 @@ namespace QUT.Gplex.Automaton
             // Assert: dSt must belong to LinkedList this.members
             LinkedListNode<DFSA.DState> node = dSt.listNode;
             this.members.Remove(node);
-            this.predCount--;
+            this.PredCount--;
             blk.AddNode(node);
         }
 
         internal PartitionBlock(int symbolCardinality) {
-            symbolsLeft = symbolCardinality;            // Default cardinality of symbol alphabet.
+            Sym = symbolCardinality;            // Default cardinality of symbol alphabet.
             members = new LinkedList<DFSA.DState>();
         }
     }

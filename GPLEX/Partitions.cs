@@ -803,7 +803,6 @@ namespace QUT.Gplex.Parser
 
         internal TagType tag = TagType.empty;
         internal CharRange range;
-        private int tableOrd = -1;
         private int hash;
 
         internal MapRun(int min, int max, int val=0)
@@ -822,7 +821,7 @@ namespace QUT.Gplex.Parser
             get { return (range.maxChr - range.minChr + 1); } 
         }
 
-        internal int TableOrd { get { return tableOrd; } set { tableOrd = value; } }
+        internal int TableOrd { get; set; } = -1;
 
         internal void Merge(int min, int max, int val=0)
         {

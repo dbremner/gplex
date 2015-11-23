@@ -39,48 +39,23 @@ namespace QUT.Gplex.Automaton
         const string dotCs = ".cs";
         const string bufferCodeName = "GplexBuffers.cs";
 
-        readonly string version;
         const int notSet = -1;
         const int asciiCardinality = 256;
         const int unicodeCardinality = 0x110000;
 
-        int hostSymCardinality = asciiCardinality;
         int targetSymCardinality = notSet;
-        int fallbackCodepage;                 // == defaultCP;
 
-        bool stack;
-        bool babel;
-		bool verbose;
-        bool caseAgnostic;
-        bool emitInfo = true;
-		bool checkOnly;
-        bool parseOnly;
-        bool persistBuff = true;
-		bool summary;
-		bool listing;
-        bool emitVer;
-        bool files = true;
-        bool embedBuffers = true;
-        bool errorsToConsole;
+        bool checkOnly;
         //bool utf8default;
         bool compressMapExplicit;
         //bool compressNextExplicit;
         bool compressMap;                  // No default compress of the class map
-        bool compressNext = true;          // Default compress the next-state tables
-        bool squeeze;
-        bool minimize = true;
-        bool hasParser = true;
-        bool charClasses;
-        bool useUnicode;
-		string fileName;                   // Filename of the input file.
-        string inputInfo;                  // Pathname plus last write DateTime.
         string pathName;                   // Input file path string from user.
         string outName;                    // Output file path string (possibly empty)
         string baseName;                   // Base name of input file, without extension.
         // string exeDirNm;                   // Directory name from which program executed.
         string userFrame;                  // Usually null.  Set by the /frame:path options
         // string dfltFrame = "gplexx.frame"; // Default frame name.
-        string frameName;                  // Path of the frame file actually used.
 
         Stream inputFile;
         Stream listFile;
@@ -88,9 +63,8 @@ namespace QUT.Gplex.Automaton
         Stream outputFile;
 
         StreamWriter listWriter;
-        TextWriter msgWrtr = Console.Out;
 
-		NFSA nfsa;
+        NFSA nfsa;
 		DFSA dfsa;
         internal Partition partition;
 
@@ -103,7 +77,7 @@ namespace QUT.Gplex.Automaton
         {
             Assembly assm = Assembly.GetExecutingAssembly();
             object info = Attribute.GetCustomAttribute(assm, typeof(AssemblyFileVersionAttribute));
-            this.version = ((AssemblyFileVersionAttribute)info).Version;
+            this.VerString = ((AssemblyFileVersionAttribute)info).Version;
         }
 
         public void Dispose()
@@ -120,22 +94,22 @@ namespace QUT.Gplex.Automaton
         }
 
 		// Support for various properties of the task
-        internal bool Files { get { return files; } }
-        internal bool Stack { get { return stack; } }
-        internal bool Babel { get { return babel; } }
-        internal bool Verbose { get { return verbose; } }
-        internal bool HasParser { get { return hasParser; } }
-        internal bool ChrClasses { get { return charClasses; } }
-        internal bool EmbedBuffers { get { return embedBuffers; } }
-        internal bool CaseAgnostic { get { return caseAgnostic; } }
-        internal bool EmitInfoHeader { get { return emitInfo; } }
+        internal bool Files { get; private set; } = true;
+        internal bool Stack { get; private set; }
+        internal bool Babel { get; private set; }
+        internal bool Verbose { get; private set; }
+        internal bool HasParser { get; private set; } = true;
+        internal bool ChrClasses { get; private set; }
+        internal bool EmbedBuffers { get; private set; } = true;
+        internal bool CaseAgnostic { get; private set; }
+        internal bool EmitInfoHeader { get; private set; } = true;
 
-        internal bool Version    { get { return emitVer; } }
-        internal bool Summary    { get { return summary; } }
-		internal bool Listing    { get { return listing; } }
+        internal bool Version { get; private set; } //emit version info
+        internal bool Summary { get; private set; }
+        internal bool Listing { get; private set; }
 
-        internal bool ParseOnly  { get { return parseOnly; } }
-        internal bool Persist    { get { return persistBuff; } }
+        internal bool ParseOnly { get; private set; }
+        internal bool Persist { get; private set; } = true;
         internal bool Errors     { get { return handler.Errors; } }
         internal bool CompressMap  {
             // If useUnicode, we obey the compressMap Boolean.
@@ -146,29 +120,67 @@ namespace QUT.Gplex.Automaton
             // is to compress both map and next-state tables, while
             // for 8-bit scanners we compress next-state but not map.
             get {
-                if (useUnicode || compressMapExplicit)
+                if (Unicode || compressMapExplicit)
                     return compressMap;
                 else
                     return false;
             } 
         }
-        internal bool Squeeze { get { return squeeze; } }
-        internal bool CompressNext { get { return compressNext; } }
-        internal bool Minimize   { get { return minimize; } }
-        internal bool Warnings   { get { return handler.Warnings; } }
-        internal bool Unicode    { get { return useUnicode; } }
-        internal bool ErrorsToConsole { get { return errorsToConsole; } }
+        /// <summary>
+        /// Compress both map and next-state
+        /// but do not use two-level compression
+        /// to trade time for space.
+        /// </summary>
+        internal bool Squeeze { get; private set; }
 
-        internal int    CodePage   { get { return fallbackCodepage; } }
+
+        /// <summary>
+        /// Default compress the next-state tables
+        /// </summary>
+        internal bool CompressNext { get; private set; } = true;
+
+        /// <summary>
+        /// Minimize automaton
+        /// </summary>
+        internal bool Minimize { get; private set; } = true;
+
+        internal bool Warnings   { get { return handler.Warnings; } }
+
+        /// <summary>
+        /// use Unicode
+        /// </summary>
+        internal bool Unicode { get; private set; }
+
+
+        internal bool ErrorsToConsole { get; private set; }
+
+        /// <summary>
+        /// default codepage
+        /// </summary>
+        internal int    CodePage { get; private set; }
+
         internal int    ErrNum     { get { return handler.ErrNum; } }
         internal int    WrnNum     { get { return handler.WrnNum; } }
-        internal string VerString  { get { return version; } }
-        internal string FileName { get { return fileName; } }
-        internal string InputInfo { get { return inputInfo; } }
-        internal string FrameName { get { return frameName; } }
-        internal TextWriter Msg    { get { return msgWrtr; } }
+        internal string VerString { get; }
 
-        internal int HostSymCardinality { get { return hostSymCardinality; } }
+        /// <summary>
+        /// name of input file
+        /// </summary>
+        internal string FileName { get; private set; }
+
+        /// <summary>
+        /// Pathname plus last write DateTime.
+        /// </summary>
+        internal string InputInfo { get; private set; }
+
+        /// <summary>
+        /// Path of the frame file actually used
+        /// </summary>
+        internal string FrameName { get; private set; }
+
+        internal TextWriter Msg { get; private set; } = Console.Out;
+
+        internal int HostSymCardinality { get; } = asciiCardinality;
 
         internal int TargetSymCardinality { 
             get 
@@ -197,18 +209,18 @@ namespace QUT.Gplex.Automaton
             {
                 outName = option.Substring(4);
                 if (outName.Equals("-"))
-                    msgWrtr = Console.Error;
+                    Msg = Console.Error;
             }
             else if (arg.StartsWith("FRAME:", StringComparison.Ordinal))
                 userFrame = arg.Substring(6);
             else if (arg.Equals("HELP", StringComparison.Ordinal) || arg.Equals("?"))
                 return OptionState.needUsage;
             else if (arg.Equals("ERRORSTOCONSOLE", StringComparison.Ordinal))
-                errorsToConsole = true;
+                ErrorsToConsole = true;
             else if (arg.Contains("CODEPAGE") && (arg.Contains("HELP") || arg.Contains("?")))
                 return OptionState.needCodepageHelp;
             else if (arg.StartsWith("CODEPAGE:", StringComparison.Ordinal))
-                fallbackCodepage = CodePageHandling.GetCodePage(option);
+                CodePage = CodePageHandling.GetCodePage(option);
             else
             {
                 bool negate = arg.StartsWith("NO", StringComparison.Ordinal);
@@ -216,37 +228,37 @@ namespace QUT.Gplex.Automaton
                 if (negate) 
                     arg = arg.Substring(2);
                 if (arg.Equals("CHECK", StringComparison.Ordinal)) checkOnly = !negate;
-                else if (arg.StartsWith("CASEINSEN", StringComparison.Ordinal)) caseAgnostic = !negate;
-                else if (arg.StartsWith("LIST", StringComparison.Ordinal)) listing = !negate;
-                else if (arg.Equals("SUMMARY", StringComparison.Ordinal)) summary = !negate;
-                else if (arg.Equals("STACK", StringComparison.Ordinal)) stack = !negate;
-                else if (arg.Equals("MINIMIZE", StringComparison.Ordinal)) minimize = !negate;
-                else if (arg.Equals("VERSION", StringComparison.Ordinal)) emitVer = !negate;
-                else if (arg.Equals("PARSEONLY", StringComparison.Ordinal)) parseOnly = !negate;
-                else if (arg.StartsWith("PERSISTBUFF", StringComparison.Ordinal)) persistBuff = !negate;
-                else if (arg.Equals("PARSER", StringComparison.Ordinal)) hasParser = !negate;
-                else if (arg.Equals("BABEL", StringComparison.Ordinal)) babel = !negate;
-                else if (arg.Equals("FILES", StringComparison.Ordinal)) files = !negate;
-                else if (arg.StartsWith("EMBEDBUFF", StringComparison.Ordinal)) embedBuffers = !negate;
-                else if (arg.Equals("INFO", StringComparison.Ordinal)) emitInfo = !negate;
+                else if (arg.StartsWith("CASEINSEN", StringComparison.Ordinal)) CaseAgnostic = !negate;
+                else if (arg.StartsWith("LIST", StringComparison.Ordinal)) Listing = !negate;
+                else if (arg.Equals("SUMMARY", StringComparison.Ordinal)) Summary = !negate;
+                else if (arg.Equals("STACK", StringComparison.Ordinal)) Stack = !negate;
+                else if (arg.Equals("MINIMIZE", StringComparison.Ordinal)) Minimize = !negate;
+                else if (arg.Equals("VERSION", StringComparison.Ordinal)) Version = !negate;
+                else if (arg.Equals("PARSEONLY", StringComparison.Ordinal)) ParseOnly = !negate;
+                else if (arg.StartsWith("PERSISTBUFF", StringComparison.Ordinal)) Persist = !negate;
+                else if (arg.Equals("PARSER", StringComparison.Ordinal)) HasParser = !negate;
+                else if (arg.Equals("BABEL", StringComparison.Ordinal)) Babel = !negate;
+                else if (arg.Equals("FILES", StringComparison.Ordinal)) Files = !negate;
+                else if (arg.StartsWith("EMBEDBUFF", StringComparison.Ordinal)) EmbedBuffers = !negate;
+                else if (arg.Equals("INFO", StringComparison.Ordinal)) EmitInfoHeader = !negate;
                 else if (arg.Equals("UTF8DEFAULT", StringComparison.Ordinal)) // Deprecated, compatability only.
                 {
                     if (negate)
-                        fallbackCodepage = rawCP;
+                        CodePage = rawCP;
                     else
-                        fallbackCodepage = utf8CP;
+                        CodePage = utf8CP;
                 }
                 else if (arg.Equals("COMPRESSMAP", StringComparison.Ordinal)) {
                     compressMap = !negate;
                     compressMapExplicit = true;
                 }
                 else if (arg.Equals("COMPRESSNEXT", StringComparison.Ordinal)) {
-                    compressNext = !negate;
+                    CompressNext = !negate;
                     //compressNextExplicit = true;
                 }
                 else if (arg.Equals("COMPRESS", StringComparison.Ordinal)) {
                     compressMap = !negate;
-                    compressNext = !negate;
+                    CompressNext = !negate;
                     compressMapExplicit = true;
                     //compressNextExplicit = true;
                 }
@@ -254,9 +266,9 @@ namespace QUT.Gplex.Automaton
                     // Compress both map and next-state
                     // but do not use two-level compression
                     // ==> trade time for space.
-                    squeeze = !negate;
+                    Squeeze = !negate;
                     compressMap = !negate;
-                    compressNext = !negate;
+                    CompressNext = !negate;
                     compressMapExplicit = true;
                     //compressNextExplicit = true;
                 }
@@ -265,25 +277,25 @@ namespace QUT.Gplex.Automaton
                     // set (no)unicode after the alphabet size has been set
                     // it is a command line or inline option error.
                     int cardinality = (negate ? asciiCardinality : unicodeCardinality);
-                    useUnicode = !negate;
+                    Unicode = !negate;
                     if (targetSymCardinality == notSet || targetSymCardinality == cardinality)
                         targetSymCardinality = cardinality;
                     else
                         return OptionState.alphabetLocked;
-                    if (useUnicode) {
-                        charClasses = true;
+                    if (Unicode) {
+                        ChrClasses = true;
                         if (!compressMapExplicit)
                             compressMap = true;
                     }
                 }
                 else if (arg.Equals("VERBOSE", StringComparison.Ordinal)) {
-                    verbose = !negate;
-                    if (verbose) emitVer = true;
+                    Verbose = !negate;
+                    if (Verbose) Version = true;
                 }
                 else if (arg.Equals("CLASSES", StringComparison.Ordinal)) {
-                    if (negate && useUnicode)
+                    if (negate && Unicode)
                         return OptionState.inconsistent;
-                    charClasses = !negate;
+                    ChrClasses = !negate;
                 }
                 else
                     return OptionState.errors;
@@ -294,10 +306,10 @@ namespace QUT.Gplex.Automaton
 		internal void ErrorReport()
 		{
             try {
-                if (errorsToConsole)
-                    handler.DumpAll( scanner.Buffer, msgWrtr );
+                if (ErrorsToConsole)
+                    handler.DumpAll( scanner.Buffer, Msg );
                 else
-                    handler.DumpErrorsInMsbuildFormat( scanner.Buffer, msgWrtr );
+                    handler.DumpErrorsInMsbuildFormat( scanner.Buffer, Msg );
             }
             catch (IOException)
             {
@@ -314,7 +326,7 @@ namespace QUT.Gplex.Automaton
             {
                 if (listWriter == null)
                     listWriter = ListingFile(baseName + dotLst);
-                handler.MakeListing(scanner.Buffer, listWriter, fileName, version);
+                handler.MakeListing(scanner.Buffer, listWriter, FileName, VerString);
             }
             catch (IOException) 
             { 
@@ -344,15 +356,15 @@ namespace QUT.Gplex.Automaton
             this.pathName = path;
 
             if (xNam.Equals(dotLexUC))
-                this.fileName = flnm;
+                this.FileName = flnm;
             else if (String.IsNullOrEmpty(xNam))
             {
-                this.fileName = flnm + dotLexLC;
+                this.FileName = flnm + dotLexLC;
                 this.pathName = path + dotLexLC;
             }
             else
-                this.fileName = flnm;
-            this.baseName = Path.GetFileNameWithoutExtension(this.fileName);
+                this.FileName = flnm;
+            this.baseName = Path.GetFileNameWithoutExtension(this.FileName);
 
             if (this.outName == null) // do the default outfilename
                 this.outName = this.baseName + dotCs;
@@ -370,15 +382,15 @@ namespace QUT.Gplex.Automaton
             try
             {
                 inputFile = new FileStream(this.pathName, FileMode.Open, FileAccess.Read, FileShare.Read);
-                if (verbose) msgWrtr.WriteLine("GPLEX: opened input file <{0}>", pathName);
-                inputInfo = this.pathName + " - " + File.GetLastWriteTime(this.pathName).ToString();
+                if (Verbose) Msg.WriteLine("GPLEX: opened input file <{0}>", pathName);
+                InputInfo = this.pathName + " - " + File.GetLastWriteTime(this.pathName).ToString();
             }
             catch (IOException)
             {
                 inputFile = null;
                 handler = new ErrorHandler(); // To stop handler.ErrNum faulting!
                 string message = String.Format(CultureInfo.InvariantCulture, 
-                    "Source file <{0}> not found{1}", fileName, Environment.NewLine);
+                    "Source file <{0}> not found{1}", FileName, Environment.NewLine);
                 handler.AddError(message, null); // aast.AtStart;
                 throw new ArgumentException(message);
             }
@@ -392,8 +404,8 @@ namespace QUT.Gplex.Automaton
             {
                 // Try the user-specified path if there is one given.
                 frameFile = new FileStream(path1, FileMode.Open, FileAccess.Read, FileShare.Read);
-                if (verbose) msgWrtr.WriteLine("GPLEX: opened frame file <{0}>", path1);
-                this.frameName = path1;
+                if (Verbose) Msg.WriteLine("GPLEX: opened frame file <{0}>", path1);
+                this.FrameName = path1;
                 return frameFile;
             }
             catch (IOException)
@@ -414,8 +426,8 @@ namespace QUT.Gplex.Automaton
             else // Use the embedded resource
             {
                 string gplexxFrame = QUT.Gplex.IncludeResources.Content.GplexxFrame;
-                if (verbose) msgWrtr.WriteLine("GPLEX: using frame from embedded resource");
-                this.frameName = "embedded resource";
+                if (Verbose) Msg.WriteLine("GPLEX: using frame from embedded resource");
+                this.FrameName = "embedded resource";
                 return new StringReader(gplexxFrame);
             }
         }
@@ -426,7 +438,7 @@ namespace QUT.Gplex.Automaton
             try
             {
                 rslt = new FileStream(this.outName, FileMode.Create);
-                if (verbose) msgWrtr.WriteLine("GPLEX: opened output file <{0}>", this.outName);
+                if (Verbose) Msg.WriteLine("GPLEX: opened output file <{0}>", this.outName);
             }
             catch (IOException)
             {
@@ -441,7 +453,7 @@ namespace QUT.Gplex.Automaton
             if (this.outName.Equals("-"))
             {
                 rslt = Console.Out;
-                if (verbose) msgWrtr.WriteLine("GPLEX: output sent to StdOut");
+                if (Verbose) Msg.WriteLine("GPLEX: output sent to StdOut");
             }
             else
             {
@@ -456,7 +468,7 @@ namespace QUT.Gplex.Automaton
             try
             {
                 listFile = new FileStream(outName, FileMode.Create);
-                if (verbose) msgWrtr.WriteLine("GPLEX: opened listing file <{0}>", outName);
+                if (Verbose) Msg.WriteLine("GPLEX: opened listing file <{0}>", outName);
                 return new StreamWriter(listFile);
             }
             catch (IOException)
@@ -471,7 +483,7 @@ namespace QUT.Gplex.Automaton
             try
             {
                 FileStream codeFile = new FileStream(bufferCodeName, FileMode.Create);
-                if (verbose) msgWrtr.WriteLine("GPLEX: created file <{0}>", bufferCodeName);
+                if (Verbose) Msg.WriteLine("GPLEX: created file <{0}>", bufferCodeName);
                 return codeFile;
             }
             catch (IOException)
@@ -528,16 +540,16 @@ namespace QUT.Gplex.Automaton
 
         void Status(DateTime start)
         {
-            msgWrtr.Write("GPLEX: input parsed, AST built");
-            msgWrtr.Write((Errors ? ", errors detected" : " without error"));
-            msgWrtr.Write((Warnings ? "; warnings issued. " : ". "));
-            msgWrtr.WriteLine(ElapsedTime(start));
+            Msg.Write("GPLEX: input parsed, AST built");
+            Msg.Write((Errors ? ", errors detected" : " without error"));
+            Msg.Write((Warnings ? "; warnings issued. " : ". "));
+            Msg.WriteLine(ElapsedTime(start));
         }
 
         void ClassStatus(DateTime start, int len)
         {
-            msgWrtr.Write("GPLEX: {0} character classes found.", len);
-            msgWrtr.WriteLine(ElapsedTime(start));
+            Msg.Write("GPLEX: {0} character classes found.", len);
+            Msg.WriteLine(ElapsedTime(start));
         }
 
         void CheckOptions()
@@ -565,7 +577,7 @@ namespace QUT.Gplex.Automaton
                     aast = parser.Aast;
                     parser.Parse();
                     // aast.DiagnosticDump();
-                    if (verbose) 
+                    if (Verbose) 
                         Status(start);
                     CheckOptions();
                     if (!Errors && !ParseOnly)
@@ -575,7 +587,7 @@ namespace QUT.Gplex.Automaton
                             partition = new Partition( TargetSymCardinality, this );
                             partition.FindClasses( aast );
                             partition.FixMap();
-                            if (verbose)
+                            if (Verbose)
                                 ClassStatus( t0, partition.Length );
                         }
                         else
@@ -588,7 +600,7 @@ namespace QUT.Gplex.Automaton
                             dfsa.Convert(nfsa);
                             if (!Errors)
                             {	// minimize automaton
-                                if (minimize)
+                                if (Minimize)
                                     dfsa.Minimize();
                                 if (!Errors && !checkOnly)
                                 {   // emit the scanner to output file
@@ -596,7 +608,7 @@ namespace QUT.Gplex.Automaton
                                     TextWriter outputWrtr = OutputWriter();
                                     dfsa.EmitScanner(frameRdr, outputWrtr);
 
-                                    if (!embedBuffers)
+                                    if (!EmbedBuffers)
                                         CopyBufferCode();
                                     // Clean up!
                                     if (frameRdr != null) 
