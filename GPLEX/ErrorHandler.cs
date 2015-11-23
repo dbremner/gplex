@@ -99,7 +99,7 @@ namespace QUT.Gplex.Parser
 
         void ListError(LexSpan spn, int num, string key, char lh, char rh)
         {
-            string prefix, suffix, message;
+            string prefix, suffix;
             switch (num)
             {
                 case   1: prefix = "Parser error"; suffix = "";
@@ -165,7 +165,7 @@ namespace QUT.Gplex.Parser
                     break;
             }
             // message = prefix + " <" + key + "> " + suffix;
-            message = String.Format(CultureInfo.InvariantCulture, "{0} {1}{2}{3} {4}", prefix, lh, key, rh, suffix);
+            string message = String.Format(CultureInfo.InvariantCulture, "{0} {1}{2}{3} {4}", prefix, lh, key, rh, suffix);
             this.AddError(new Error(num, message, spn, num >= Error.minWrn)); 
             if (num < Error.minWrn) errNum++; else wrnNum++;
         }
@@ -235,12 +235,8 @@ namespace QUT.Gplex.Parser
         {
             int line = 1;
             int eNum = 0;
-            int eLin = 0;
 
-            int nxtC = (int)'\n';
-            int groupFirst;
-            int currentCol;
-            int currentLine;
+            int nxtC;
 
             //
             //  Errors are sorted by line number
@@ -263,16 +259,16 @@ namespace QUT.Gplex.Parser
             //
             //  Initialize the error group
             //
-            groupFirst = 0;
-            currentCol = 0;
-            currentLine = 0;
+            int groupFirst = 0;
+            int currentCol = 0;
+            int currentLine = 0;
             //
             //  Now, for each error do
             //
             for (eNum = 0; eNum < errors.Count; eNum++)
             {
                 Error errN = errors[eNum];
-                eLin = errN.span.startLine;
+                int eLin = errN.span.startLine;
                 if (eLin > currentLine)
                 {
                     //
@@ -429,8 +425,6 @@ namespace QUT.Gplex.Parser
         internal void DumpAll(ScanBuff buff, TextWriter wrtr) {
             int  line = 1;
             int  eNum = 0;
-            int  eLin = 0;
-            int nxtC = (int)'\n'; 
             //
             //  Initialize the error group
             //
@@ -452,7 +446,7 @@ namespace QUT.Gplex.Parser
             //  Now, for each error do
             //
             for (eNum = 0; eNum < errors.Count; eNum++) {
-                eLin = errors[eNum].span.startLine;
+                int  eLin = errors[eNum].span.startLine;
                 if (eLin > currentLine) {
                     //
                     // Spill all the waiting messages
@@ -473,6 +467,7 @@ namespace QUT.Gplex.Parser
                 //
                 //  Skip lines up to *but not including* the error line
                 //
+                int nxtC = (int)'\n';
                 while (line < eLin) {
                     nxtC = buff.Read();
                     if (nxtC == (int)'\n') line++;

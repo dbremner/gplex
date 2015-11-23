@@ -374,9 +374,8 @@ namespace QUT.Gplex.Parser {
 
             internal RegExTree Parse() {
                 try {
-                    RegExTree tmp;
                     scan();
-                    tmp = RegEx();
+                    RegExTree tmp = RegEx();
                     return tmp;
                 }
                 catch (RegExException x) {
@@ -509,14 +508,12 @@ namespace QUT.Gplex.Parser {
 
             internal RegExTree LitString() {
                 int pos = index;
-                int len;
-                string str;
                 scan();                 // get past '"'
                 while (esc || (chr != '"' && chr != NUL))
                     scan();
-                len = index - 1 - pos;
+                int len = index - 1 - pos;
                 checkAndScan( '"' );
-                str = pat.Substring( pos, len );
+                string str = pat.Substring( pos, len );
                 try {
                     str = CharacterUtilities.InterpretCharacterEscapes( str );
                 }
@@ -622,7 +619,7 @@ namespace QUT.Gplex.Parser {
                     scan();
                 }
                 else {
-                    tmp = new Leaf( (int)chr );
+                    tmp = new Leaf( chr );
                     scan();
                 }
                 return tmp;
@@ -632,18 +629,16 @@ namespace QUT.Gplex.Parser {
             // must be a gplex identifier => ascii names only
             internal RegExTree UseRegexRef() {
                 // Assert chr == '{'
-                int start;
-                string name;
                 LexCategory cat;
                 scan();                                     // read past '{'
-                start = index - 1;
+                int start = index - 1;
                 //
                 //  The lexical grammar for "pattern" only
                 //  allows ident '}' as continuation here.
                 //
                 while (chr != '}' && chr != '\0')
                     scan();
-                name = pat.Substring( start, index - start - 1 );
+                string name = pat.Substring( start, index - start - 1 );
                 checkAndScan( '}' );
                 if (parent.lexCategories.TryGetValue( name, out cat )) {
                     Leaf leaf = cat.regX as Leaf;
@@ -707,9 +702,8 @@ namespace QUT.Gplex.Parser {
                 }
 
                 while (chr != NUL && (esc || chr != ']')) {
-                    int lhCodePoint;
                     int startIx = index - 1; // save starting index for error reporting
-                    lhCodePoint = (esc ? EscapedChar() : CodePoint());
+                    int lhCodePoint = (esc ? EscapedChar() : CodePoint());
                     if (!esc && lhCodePoint == (int)'-')
                         Error( 82, startIx, index - startIx, null );
                     //
@@ -765,20 +759,17 @@ namespace QUT.Gplex.Parser {
             // predicate name could be any C# identifier.
             private Leaf FilteredClass() {
                 // Assert: chr == '[', next is ':'
-                int start;
-                string name;
-                Leaf rslt;
                 scan(); // read past '['
                 scan(); // read past ':'
-                start = index - 1;
+                int start = index - 1;
                 //
                 // Get the C# identifier name.
                 //
                 checkAndScan( CharCategory.IsIdStart, "IdStart" );
                 while (CharCategory.IsIdPart( chr ))
                     scan();
-                name = pat.Substring( start, index - start - 1 );
-                rslt = GetPredicate( name, start );
+                string name = pat.Substring( start, index - start - 1 );
+                Leaf rslt = GetPredicate( name, start );
                 checkAndScan( ':' );
                 checkAndScan( ']' );
                 return rslt;
@@ -925,7 +916,7 @@ namespace QUT.Gplex.Parser {
             //            <*>{ ...
             //  Active list of start states should be "all states"
             //
-            List<StartState> newTop = null;
+            List<StartState> newTop;
             List<StartState> current = this.Current;
             if (list.Contains( StartState.allState ))
                 newTop = list;
@@ -1057,9 +1048,6 @@ namespace QUT.Gplex.Parser {
         }
 
         void Check( AAST aast, RegExTree tree ) {
-            Binary bnryTree;
-            Unary unryTree;
-
             if (tree == null) return;
             switch (tree.op) {
                 case RegOp.charClass:
@@ -1070,7 +1058,7 @@ namespace QUT.Gplex.Parser {
                 case RegOp.context:
                 case RegOp.concat:
                 case RegOp.alt:
-                    bnryTree = (Binary)tree;
+                    Binary bnryTree = (Binary)tree;
                     Check( aast, bnryTree.lKid );
                     Check( aast, bnryTree.rKid );
                     if (tree.op == RegOp.context &&
@@ -1079,7 +1067,7 @@ namespace QUT.Gplex.Parser {
                     break;
                 case RegOp.closure:
                 case RegOp.finiteRep:
-                    unryTree = (Unary)tree;
+                    Unary unryTree = (Unary)tree;
                     Check( aast, unryTree.kid );
                     break;
                 case RegOp.leftAnchor:
@@ -1291,12 +1279,11 @@ namespace QUT.Gplex.Parser {
                 //     that no interpretation is to be used.
                 //
                 while (j < max) {
-                    int start;
                     while (j < max && !Test( j ))
                         j++;
                     if (j == max)
                         break;
-                    start = j;
+                    int start = j;
                     while (j < max && Test( j ))
                         j++;
                     this.rangeLit.list.Add( new CharRange( start, (j - 1) ) );
@@ -1330,12 +1317,11 @@ namespace QUT.Gplex.Parser {
                 // Now construct the CharRange literal
                 //
                 while (j < max) {
-                    int start;
                     while (j < max && !Test( cArray[j] ))
                         j++;
                     if (j == max)
                         break;
-                    start = j;
+                    int start = j;
                     while (j < max && Test( cArray[j] ))
                         j++;
                     this.rangeLit.list.Add( new CharRange( start, (j - 1) ) );

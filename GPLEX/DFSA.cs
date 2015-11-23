@@ -102,13 +102,10 @@ namespace QUT.Gplex.Automaton
         void FindShortestStrings()
         {
             Queue<DState> worklist = new Queue<DState>();
-            DfsaInstance inst;
-            DState elem;
-            DState next;
             // Push every start state and anchor state on the worklist
             for (int i = 0; i < dfas.Length; i++)
             {
-                inst = dfas[i];
+                DfsaInstance inst = dfas[i];
                 if (inst != null)
                 {
                     inst.start.shortestStr = "";
@@ -125,12 +122,12 @@ namespace QUT.Gplex.Automaton
             // Process every state reachable from the popped state
             while (worklist.Count > 0)
             {
-                elem = worklist.Dequeue();
+                DState elem = worklist.Dequeue();
                 elem.listed = false;
                 for (int i = 1; i < MaxSym; i++)
                 {
                     int ch = i;
-                    next = elem.GetNext(ch);
+                    DState next = elem.GetNext(ch);
                     if (next != null &&
                         (next.shortestStr == null || next.shortestStr.Length > elem.shortestStr.Length + 1))
                     {
@@ -155,15 +152,12 @@ namespace QUT.Gplex.Automaton
         void FindReachingStrings()
         {
             Queue<DState> worklist = new Queue<DState>();
-            DfsaInstance inst;
-            DState elem;
-            DState next;
             int count = backupCount;
 
             // Push every start state and anchor state on the worklist
             for (int i = 0; i < dfas.Length; i++)
             {
-                inst = dfas[i];
+                DfsaInstance inst = dfas[i];
                 if (inst != null)
                 {
                     inst.start.shortestStr = "";
@@ -180,11 +174,11 @@ namespace QUT.Gplex.Automaton
             // Process every unlisted state reachable from the popped state
             while (worklist.Count > 0)
             {
-                elem = worklist.Dequeue();
+                DState elem = worklist.Dequeue();
                 for (int i = 1; i < MaxSym; i++)
                 {
                     int ch = i;
-                    next = elem.GetNext(ch);
+                    DState next = elem.GetNext(ch);
                     if (next != null && !next.listed)
                     {
                         next.shortestStr = elem.shortestStr +
@@ -1885,9 +1879,9 @@ namespace QUT.Gplex.Automaton
                 }
                 else
                 {
-                    int dflt = 0;   // The excluded nextstate value.
-                    uint min = 0;   // Start index of remainder, in [0-255]
-                    uint rng = 0;   // Number of elements in the remainder
+                    int dflt;   // The excluded nextstate value.
+                    uint min;   // Start index of remainder, in [0-255]
+                    uint rng;   // Number of elements in the remainder
                     if (myTask.Verbose && foundShortestStrings)
                         sWrtr.Write("// Shortest string \"{0}\"{1}      ", CharacterUtilities.Map(dSt.shortestStr), Environment.NewLine);
                     dSt.ExcludeLongestRun(out min, out rng, out dflt);

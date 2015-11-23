@@ -258,8 +258,6 @@ namespace QUT.Gplex.Automaton
             internal void MakePath(RegExTree tree, NState startState, NState endState)
             {
                 NState tmp1 = null;
-                NState tmp2 = null;
-                int rLen, lLen;
 
                 switch (tree.op)
                 {
@@ -274,8 +272,8 @@ namespace QUT.Gplex.Automaton
                         switch (tree.op)
                         {
                             case RegOp.context:
-                                rLen = binNode.rKid.contextLength();
-                                lLen = binNode.lKid.contextLength();
+                                int rLen = binNode.rKid.contextLength();
+                                int lLen = binNode.lKid.contextLength();
                                 if (rLen <= 0 && lLen <= 0)
                                     throw new StringInterpretException("variable right context '/' not implemented");
                                 else
@@ -310,7 +308,7 @@ namespace QUT.Gplex.Automaton
                         switch (tree.op)
                         {
                             case RegOp.closure:
-                                tmp2 = MkState();
+                                NState tmp2 = MkState();
                                 if (unaryNode.minRep == 0)
                                 {
                                     tmp1 = MkState();
@@ -441,7 +439,7 @@ namespace QUT.Gplex.Automaton
 
             internal NState GetNext(int sym)
             {
-                NState rslt = null;
+                NState rslt;
                 ulong key = checked(((ulong)this.serialNumber << 32) + (ulong)sym);
                 myNfsa.next.TryGetValue(key, out rslt);
                 return rslt;

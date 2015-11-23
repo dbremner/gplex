@@ -347,8 +347,6 @@ namespace QUT.Gppg {
         protected abstract void DoAction( int actionNumber );
 
         private bool ErrorRecovery() {
-            bool discard;
-
             if (!recovering) // if not recovering from previous error
                 ReportError();
 
@@ -360,7 +358,7 @@ namespace QUT.Gppg {
             //  bool until after invalid tokens have been discarded.
             //
             ShiftErrorToken();
-            discard = DiscardInvalidTokens();
+            bool discard = DiscardInvalidTokens();
             recovering = true;
             tokensSinceLastError = 0;
             return discard;

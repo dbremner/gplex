@@ -239,10 +239,9 @@ namespace QUT.Gplex.Parser
             {
                 int start, finish;
                 int limit = current + stepSize - 1;
-                MapRun thisRun;
                 tMap.GetEnclosingRange(current, out start, out finish);
                 if (finish > limit) finish = limit;
-                thisRun = new MapRun(current, finish, tMap[current]);
+                MapRun thisRun = new MapRun(current, finish, tMap[current]);
                 result.Add(thisRun);
                 current = finish + 1;
                 while (current <= limit)

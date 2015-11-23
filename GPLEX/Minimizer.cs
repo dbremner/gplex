@@ -115,7 +115,7 @@ namespace QUT.Gplex.Automaton
         /// <param name="list">The list of all DStates</param>
         internal void PopulatePartitions(List<DFSA.DState> list)
         {
-            PartitionBlock blk = null;
+            PartitionBlock blk;
             dfsa.origLength = list.Count;
             for (int i = 1; i < list.Count; i++)
             {
@@ -209,7 +209,6 @@ namespace QUT.Gplex.Automaton
             int generation = 0;
             while (worklist.Count > 0)
             {
-                List<DFSA.DState> predSet = null;
                 //
                 // We are going to split all blocks with respect to a
                 // particular (Block, Symbol) pair. 
@@ -227,7 +226,7 @@ namespace QUT.Gplex.Automaton
                     continue;                 // Go around again to get new block.
                 }
                 generation++;
-                predSet = new List<DFSA.DState>();
+                List<DFSA.DState> predSet = new List<DFSA.DState>();
                 //
                 // Form a set of all those states that have a
                 // next-state in "blk" on symbol "sym".
@@ -268,11 +267,10 @@ namespace QUT.Gplex.Automaton
                     List<PartitionBlock> splits = new List<PartitionBlock>();
                     foreach (DFSA.DState lSt in predSet)
                     {
-                        PartitionBlock tBlk = null;
                         PartitionBlock lBlk = (lSt.block as PartitionBlock);
                         if (lBlk.PredCount != lBlk.MemberCount) // Need to split this block
                         {
-                            tBlk = lBlk.twinBlk;
+                            PartitionBlock tBlk = lBlk.twinBlk;
                             if (tBlk == null)
                             {
                                 tBlk = MkNewBlock();
@@ -287,7 +285,7 @@ namespace QUT.Gplex.Automaton
                     foreach (PartitionBlock tBlk in splits)
                     {
                         PartitionBlock lBlk = tBlk.twinBlk;
-                        PartitionBlock push = null;
+                        PartitionBlock push;
                         if (lBlk.Sym == 0)    // lBlk is not currently on the list so push smaller block
                         {
                             if (lBlk.MemberCount < tBlk.MemberCount)
