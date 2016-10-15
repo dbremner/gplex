@@ -1081,7 +1081,7 @@ namespace QUT.Gplex.Parser {
 
         internal string Name { get; }
 
-        internal string PredDummyName { get { return "PRED_" + name + "_DUMMY"; } }
+        internal string PredDummyName { get { return $"PRED_{Name}_DUMMY"; } }
 
         internal void ParseRE( AAST aast ) { regX = new AAST.ReParser( verb, vrbSpan, aast ).Parse(); }
     }
